@@ -2,9 +2,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { createSelector } from "reselect";
 import { apiCall } from "./apiActions";
-import { bugsURL } from "../config.json";
-
-let lastId = 0;
+import { bugsURL, cacheLife } from "../config.json";
+import moment from "moment";
 
 const bugSlice = createSlice({
   name: "bugs",
@@ -29,23 +28,20 @@ const bugSlice = createSlice({
       bugs.lastFetch = Date.now();
     },
     ASSIGN_BUG: (bugs, action) => {
-      const { bugId, userId } = action.payload;
-      const index = bugs.list.findIndex((bug) => bug.id === bugId);
+      const { id, userId } = action.payload;
+      const index = bugs.list.findIndex((bug) => bug.id === id);
       bugs.list[index].userId = userId;
     },
 
     ADD_BUG: (bugs, action) => {
-      bugs.list.push({
-        id: ++lastId,
-        description: action.payload.description,
-        resolved: false,
-      });
+      bugs.list.push(action.payload);
     },
     REMOVE_BUG: (bugs, action) =>
       bugs.list.filter((bug) => bug.id !== action.payload.id),
     RESOLVE_BUG: (bugs, action) => {
       const index = bugs.list.findIndex((bug) => bug.id === action.payload.id);
       bugs.list[index].resolved = true;
+      //bugs.list.push(action.payload);
     },
   },
 });
@@ -67,13 +63,46 @@ export const getBugsByUser = (userId) =>
 export const bugActions = bugSlice.actions;
 export default bugSlice.reducer;
 
-export const loadBugs = () =>
-  apiCall({
+export const loadBugs = () => (dispatch, getState) => {
+  const { lastFetch } = getState().entities.bugs;
+  const diffInMinutes = moment().diff(moment(lastFetch), "minutes");
+  if (diffInMinutes < cacheLife) return;
+  dispatch(
+    apiCall({
+      url: bugsURL,
+      onSuccess: bugActions.bugsRecieved.type,
+      onStart: bugActions.bugsRequestStart.type,
+      onError: bugActions.bugsRequestFailed.type,
+    })
+  );
+};
+
+export const addBug = (bug) => {
+  return apiCall({
     url: bugsURL,
-    onSuccess: bugActions.bugsRecieved.type,
-    onStart: bugActions.bugsRequestStart.type,
-    onError: bugActions.bugsRequestFailed.type,
+    method: "post",
+    data: bug,
+    onSuccess: bugActions.ADD_BUG.type,
   });
+};
+
+export const assignBug = (bugId, userId) => {
+  return apiCall({
+    url: bugsURL + "/" + bugId,
+    method: "patch",
+    data: { userId },
+    onSuccess: bugActions.ASSIGN_BUG.type,
+  });
+};
+
+export const resolveBug = (id) => {
+  return apiCall({
+    url: bugsURL + "/" + id,
+    method: "patch",
+    data: { resolved: true },
+    onSuccess: bugActions.RESOLVE_BUG.type,
+  });
+};
 // Action Creators
 
 // export const ADD_BUG = createAction("bugAdded");

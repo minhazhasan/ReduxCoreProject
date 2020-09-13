@@ -7,7 +7,7 @@ import { bugActions, getUnresolvedBugs, getBugsByUser } from "./store/bugs";
 import { projectActions } from "./store/projects";
 import { userActions } from "./store/users";
 import * as apiActions from "./store/apiActions";
-import { loadBugs } from "./store/bugs";
+import { loadBugs, addBug, assignBug, resolveBug } from "./store/bugs";
 
 // var createStore = require("./redux_test");
 // var customStore = createStore(reducer);
@@ -32,9 +32,18 @@ const store = configureStore();
 //   },
 // });
 
-store.dispatch(loadBugs());
+//store.dispatch(addBug({ description: "Bug 1" }));
 
-setTimeout(() => store.dispatch(loadBugs()), 3000);
+store.dispatch(loadBugs());
+//store.dispatch(assignBug({ userId: 5 }));
+
+setTimeout(() => {
+  store.dispatch(resolveBug(4));
+}, 2000);
+
+setTimeout(() => {
+  store.dispatch(assignBug(3, 10));
+}, 2000);
 // store.dispatch(userActions.ADD_USER({ name: "User 1" }));
 // store.dispatch(userActions.ADD_USER({ name: "User 2" }));
 // store.dispatch(userActions.ADD_USER({ name: "User 3" }));
