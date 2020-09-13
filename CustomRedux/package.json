@@ -1,0 +1,26 @@
+{
+  "name": "customredux",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server --open",
+    "build": "webpack"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@reduxjs/toolkit": "^1.4.0",
+    "axios": "^0.20.0",
+    "moment": "^2.27.0",
+    "redux": "^4.0.5",
+    "reselect": "^4.0.0",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "devDependencies": {
+    "redux-devtools-extension": "^2.13.8",
+    "source-map-loader": "^1.1.0"
+  }
+}
